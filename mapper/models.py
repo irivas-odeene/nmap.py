@@ -1,16 +1,12 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 
+@dataclass
 class FinishedStat:
-    def __init__(
-            self,
-            time: datetime,
-            elapsed: timedelta,
-            success: bool
-    ):
-        self.time = time
-        self.elapsed = elapsed
-        self.success = success
+    time: datetime
+    elapsed: timedelta
+    success: bool
 
     def start_time(self):
         return self.time - self.elapsed
