@@ -8,8 +8,10 @@ def dict_to_kwargs(d, attrib):
     for key, act in d.items():
         if type(act) == tuple:
             d[key] = act[0](attrib[act[1]])
-        elif type(act) == type:
+        elif type(act) == str:
             d[key] = attrib[act]
+        elif type(act) == type:
+            d[key] = act(attrib[key])
         else:
             d[key] = act
 
