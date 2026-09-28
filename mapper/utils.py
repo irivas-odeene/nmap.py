@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 timestamp_to_datetime = lambda t: datetime.fromtimestamp(int(t))
 seconds_to_timedelta = lambda s: timedelta(seconds=float(s))
+string_to_datetime = lambda s: datetime.strptime(s, '%c')
 
 def dict_to_kwargs(d, attrib):
     missing = []
