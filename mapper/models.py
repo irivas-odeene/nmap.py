@@ -5,13 +5,16 @@ from mapper.utils import *
 
 @dataclass
 class Scan:
+    # -- atributos
     start: datetime
     version: str
     xmlversion: str
+    # -- hijos
     scaninfo: ScanInfo
     verbose: Verbose
     debugging: Debugging
     hosthint: HostHint
+    host: Host
 
     def __str__(self):
         return f"NMap versión {self.version}, escaneado el {datetime_to_str(self.start)}"
@@ -24,7 +27,8 @@ class Scan:
             'scaninfo': create_from_tag(root, 'scaninfo', ScanInfo),
             'verbose': create_from_tag(root, 'verbose', Verbose),
             'debugging': create_from_tag(root, 'debugging', Debugging),
-            'hosthint': create_from_tag(root, 'hosthint', HostHint)
+            'hosthint': create_from_tag(root, 'hosthint', HostHint),
+            'host': create_from_tag(root, 'host', Host)
         }
         return Scan(**dict_to_kwargs(kwargs, root.attrib))
 
@@ -70,12 +74,38 @@ class Debugging:
 @dataclass
 class HostHint:
     status: Status
+    addresses: list[Address]
+    # hostnames?
 
     def parse(root):
         kwargs = {
-            'status': create_from_tag(root, 'status', Status)
+            'status': create_from_tag(root, 'status', Status),
+            'addresses': create_from_list(root, 'address', Address)
         }
         return HostHint(**dict_to_kwargs(kwargs, root.attrib))
+
+
+@dataclass
+class Host:
+    start: datetime
+    end: datetime
+    status: Status
+    addresses: list[Address]
+    # hostnames?
+    ports: list[Port]
+
+    def duration(self):
+        return self.end - self.start
+
+    def parse(root):
+        kwargs = {
+            'start': (timestamp_to_datetime, 'starttime'),
+            'end': (timestamp_to_datetime, 'endtime'),
+            'status': create_from_tag(root, 'status', Status),
+            'addresses': create_from_list(root, 'address', Address),
+            'ports': create_from_list(root.find('ports'), 'port', Port)
+        }
+        return Host(**dict_to_kwargs(kwargs, root.attrib))
 
 
 @dataclass
@@ -91,6 +121,75 @@ class Status:
             'reason_ttl': int
         }
         return Status(**dict_to_kwargs(kwargs, root.attrib))
+
+
+@dataclass
+class Address:
+    addr: str
+    addr_type: str
+    vendor: str = None
+
+    def parse(root):
+        kwargs = {
+            'addr': str,
+            'addr_type': 'addrtype',
+            'vendor': str
+        }
+        return Address(**dict_to_kwargs(kwargs, root.attrib))
+
+
+@dataclass
+class Port:
+    protocol: str
+    portnumber: int
+    state: State
+    service: Service = None
+
+    def parse(root):
+        kwargs = {
+            'protocol': str,
+            'portnumber': (int, 'portid'),
+            'state': create_from_tag(root, 'state', State),
+            'service': create_from_tag(root, 'service', Service)
+        }
+        return Port(**dict_to_kwargs(kwargs, root.attrib))
+
+
+@dataclass
+class State:
+    state: str
+    reason: str
+    reason_ttl: int
+    # reason_ip?
+
+    def parse(root):
+        kwargs = {
+            'state': str,
+            'reason': str,
+            'reason_ttl': int
+        }
+        return State(**dict_to_kwargs(kwargs, root.attrib))
+
+
+@dataclass
+class Service:
+    name: str
+    method: str
+    conf: int
+    # tunnel?
+    # proto?
+    # rpcnum?
+    # lowver?
+    # highver?
+    # ...
+
+    def parse(root):
+        kwargs = {
+            'name': str,
+            'method': str,
+            'conf': int
+        }
+        return Service(**dict_to_kwargs(kwargs, root.attrib))
 
 
 @dataclass
