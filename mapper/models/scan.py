@@ -19,6 +19,20 @@ class Scan:
         Versión de nmap que realizó el escaneo
     xmlversion : str
         Versión de la salida XML de nmap
+    scaninfo : ScanInfo|None
+            [Opcional] Información general sobre el tipo de escaneo
+    verbose : Verbose
+        Información sobre el nivel de logging
+    debugging : Debugging
+        Información sobre el nivel de logging
+    hosthint : HostHint|None
+        [Opcional] Resumen de los equipos descubiertos
+    hosts : list[Host]|None
+        [Opcional] Equipos descubiertos
+    runstats : RunStats
+        Estadísticas sobre la ejecución
+
+    Sin implementar: target, taskbegin, taskprogress, taskend, prescript, postscript, output
     """
     # -- atributos
     start: datetime
@@ -29,17 +43,25 @@ class Scan:
     debugging: Debugging
     runstats: RunStats
     # -- elementos opcionales
-    scaninfo: ScanInfo = None
-    hosthint: HostHint = None
-    hosts: list[Host] = None
+    scaninfo: ScanInfo|None = None
+    hosthint: HostHint|None = None
+    hosts: list[Host]|None = None
 
     def __str__(self):
-        return f"NMap versión {self.version}, escaneado el {datetime_to_str(self.start)}"
+        return f"NMap version {self.version}, scanned on {datetime_to_str(self.start)}"
 
-    def get_host(self, addr: str):
+    def get_host(self, addr: str) -> Host|None:
+        """Buscar un host entre los descubiertos por su dirección IP o MAC
+
+        Busca entre los hosts aquel con dirección `addr` y lo devuelve
+
+        addr : str
+            Dirección del host que se busca
+        """
         for host in self.hosts:
-            if host.addres.addr == addr:
+            if addr in host.addresses:
                 return host
+
         return None
 
     def parse(root: Element) -> object:
@@ -59,6 +81,17 @@ class Scan:
 
 @dataclass
 class ScanInfo:
+    """Información sobre el tipo de escaneo y los servicios descubiertos
+
+    scan_type : str
+        Tipo de escaneo: [syn, ack, bounce, connect, null, xmas, window, maimon fin, udp, sctpinit, sctpcookieecho, ipproto]
+    protocol : str
+        Protocolo del escaneo: [ip, tcp, udp, sctp]
+    numservices : int
+        Número de servicios (puertos) descubiertos
+    services : str
+        Rangos de puertos escaneados
+    """
     scan_type: str
     protocol: str
     numservices: int
@@ -82,6 +115,7 @@ class ScanInfo:
 
 @dataclass
 class Verbose:
+    """Nivel de detalle de la salida del escaneo"""
     level: int
 
     def parse(root):
@@ -90,6 +124,7 @@ class Verbose:
 
 @dataclass
 class Debugging:
+    """Nivel de detalle de la salida del escaneo"""
     level: int
 
     def parse(root):

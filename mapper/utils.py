@@ -8,7 +8,8 @@ Utilidades para trabajar con fechas y horas a través de datetime en python:
 timestamp_to_datetime = lambda t: datetime.fromtimestamp(int(t))
 seconds_to_timedelta = lambda s: timedelta(seconds=float(s))
 string_to_datetime = lambda s: datetime.strptime(s, '%c')
-datetime_to_str = lambda d: d.strftime('%A, %d de %b de %Y, a las %H:%M')
+# datetime_to_str = lambda d: d.strftime('%A, %d de %b de %Y, a las %H:%M')
+datetime_to_str = lambda d: d.strftime('%c')
 
 def dict_to_kwargs(d: dict, attrib: Element) -> dict:
     """Generar un diccionario de parámetros por nombre a partir de un subarbol
