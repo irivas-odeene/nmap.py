@@ -85,6 +85,14 @@ class Host:
         """Duración del escaneo para el equipo"""
         return self.end - self.start
 
+    def find(self, x):
+        for port in self.ports:
+            if type(x) == int and port.portnumber == x:
+                return port
+            elif type(x) == str and port.service is not None:
+                if port.service.name == x:
+                    return port
+
     def parse(root):
         kwargs = {
             'start': (timestamp_to_datetime, 'starttime'),
@@ -227,7 +235,6 @@ class Trace:
     hops: list[Hop]|None = None
 
     def parse(root):
-        print(create_from_list(root, 'hop', Hop))
         return Trace(hops = create_from_list(root, 'hop', Hop))
 
 

@@ -21,6 +21,17 @@ class Port:
     state: State
     service: Service = None
 
+    def __str__(self):
+        return f"{self.portnumber:>5}/{self.protocol} {self.state.state:^10} {self.service.name:<20} {self.service.version}"
+
+    def __eq__(self, x: int|str):
+        if type(x) == str:
+            return x == self.service.name
+        return x == self.portnumber
+
+    def __hash__(self):
+        return int(''.join([str(ord(l)) for l in self.protocol])+str(self.portnumber))
+
     def parse(root):
         kwargs = {
             'protocol': str,
